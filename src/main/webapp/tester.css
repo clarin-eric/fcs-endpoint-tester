@@ -1,0 +1,56 @@
+@CHARSET "ISO-8859-1";
+
+body {
+	font-family: Arial, Helvetica, Sans-Serif;
+	font-size: 12pt;
+}
+
+h1 {
+	font-size: 120%;
+}
+
+h2 {
+	font-size: 110%;
+}
+
+p,pre {
+	margin: 2px 0 2px 0;
+}
+
+ul.log {
+	list-style: none;
+	margin: 0;
+	padding-left: 0;
+}
+
+.success {
+	color: #00aa00;
+	background-color: inherit;
+}
+
+.warning {
+	color: #aa0000;
+	background-color: inherit;
+}
+
+.error {
+	color: #aa0000;
+	background-color: inherit;
+}
+
+pre,code {
+	font-size: 90%;
+}
+
+a.togglelink {
+	font-size: 85%;
+	color: #0000a0;
+	background-color: inherit;
+	vertical-align: middle;
+	line-height: 85%;
+}
+
+a.togglelink:VISITED {
+    color: #0000a0;
+    background-color: inherit;
+}
