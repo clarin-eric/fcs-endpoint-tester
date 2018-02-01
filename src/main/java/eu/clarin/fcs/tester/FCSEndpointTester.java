@@ -224,13 +224,9 @@ public class FCSEndpointTester implements ServletContextListener {
             if (ed != null) {
                 if (ed.getVersion() == 1) {
                     profile = FCSTestProfile.CLARIN_FCS_1_0;
-                } else if (ed.getVersion() == 2) {
-                    throw new SRUClientException("CLARIN-FCS version 2.0 " +
-                            "MUST use SRU 2.0. Endpoint used SRU 1.2 " +
-                            "but claimed to support FCS 2.0 in it's " +
-                            "endpoint description!");
                 }
             } else {
+                logger.debug("assume legacy");
                 profile = FCSTestProfile.CLARIN_FCS_LEGACY;
             }
 
@@ -242,13 +238,26 @@ public class FCSEndpointTester implements ServletContextListener {
                         ClarinFCSConstants.X_FCS_ENDPOINT_DESCRIPTION,
                         ClarinFCSConstants.TRUE);
                 request.setParseRecordDataEnabled(true);
-                response = client.explain(request);
+                try {
+                    response = client.explain(request);
 
-                ed = response.getFirstExtraResponseData(
-                                ClarinFCSEndpointDescription.class);
-                if (ed != null) {
-                    if (ed.getVersion() == 2) {
-                        profile = FCSTestProfile.CLARIN_FCS_2_0;
+                    ed = response.getFirstExtraResponseData(
+                            ClarinFCSEndpointDescription.class);
+                    if (ed != null) {
+                        if (ed.getVersion() == 2) {
+                            profile = FCSTestProfile.CLARIN_FCS_2_0;
+                        }
+                    }
+                } catch (SRUClientException e) {
+                    if ((e.getMessage() != null) && (e.getMessage()
+                            .contains("responded with different version"))) {
+                        throw new SRUClientException(
+                                "Seriously broken Endpoint: when trying to " +
+                                "detect FCS 2.0 the Endpoint illegally " +
+                                "responded with a SRU 1.2 reponse to a " +
+                                "SRU 2.0 request!");
+                    } else {
+                        throw e;
                     }
                 }
             }
@@ -324,6 +333,8 @@ public class FCSEndpointTester implements ServletContextListener {
             FCSTestResult result = null;
             try {
                 handler.reset();
+                logcapturehandler.publish(new LogRecord(Level.FINE,
+                        "running test class " + test.getClass().getName()));
                 result = test.perform(context, client, handler);
                 result.setLogRecords(logcapturehandler.getLogRecords());
             } catch (SRUClientException e) {
