@@ -27,8 +27,6 @@ import eu.clarin.sru.client.SRUScanRequest;
 import eu.clarin.sru.client.SRUSimpleClient;
 
 @FCSTestCase(priority=2000, profiles = {
-        FCSTestProfile.CLARIN_FCS_1_0,
-        FCSTestProfile.CLARIN_FCS_2_0,
         FCSTestProfile.CLARIN_FCS_LEGACY
 })
 public class TestScan1 extends FCSTest {
