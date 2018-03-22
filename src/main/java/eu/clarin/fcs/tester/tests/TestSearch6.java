@@ -58,7 +58,7 @@ public class TestSearch6 extends FCSTest {
             FCSTestHandler handler) throws SRUClientException {
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(SRUClientConstants.QUERY_TYPE_CQL,
-                context.getRandomSearchTerm());
+                escapeCQL(context.getRandomSearchTerm()));
         req.setExtraRequestData(
                 SRUSearchRetrieveRequest.X_MALFORMED_START_RECORD, "0");
         client.searchRetrieve(req, handler);

@@ -70,7 +70,7 @@ public class TestSearch12 extends FCSTest {
             FCSTestHandler handler) throws SRUClientException {
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(SRUClientConstants.QUERY_TYPE_CQL,
-                context.getUserSearchTerm());
+                escapeCQL(context.getUserSearchTerm()));
         req.setRecordSchema(FCS_RECORD_SCHEMA);
         req.setMaximumRecords(5);
         client.searchRetrieve(req, handler);

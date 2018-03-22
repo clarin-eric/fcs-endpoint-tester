@@ -57,7 +57,7 @@ public class TestSearch10 extends FCSTest {
             FCSTestHandler handler) throws SRUClientException {
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(SRUClientConstants.QUERY_TYPE_CQL,
-                context.getRandomSearchTerm());
+                escapeCQL(context.getRandomSearchTerm()));
         req.setStartRecord(Integer.MAX_VALUE);
         client.searchRetrieve(req, handler);
         return handler.findDiagnostic("info:srw/diagnostic/1/61")

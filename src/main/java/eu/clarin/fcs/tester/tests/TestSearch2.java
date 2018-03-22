@@ -59,7 +59,7 @@ public class TestSearch2 extends FCSTest {
             FCSTestHandler handler) throws SRUClientException {
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(SRUClientConstants.QUERY_TYPE_CQL,
-                context.getRandomSearchTerm());
+                escapeCQL(context.getRandomSearchTerm()));
         req.setRecordSchema(ClarinFCSRecordData.RECORD_SCHEMA);
         client.searchRetrieve(req, handler);
         return handler.getDiagnosticCount() == 0
