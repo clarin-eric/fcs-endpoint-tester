@@ -28,8 +28,6 @@ import eu.clarin.sru.client.SRUSimpleClient;
 
 
 @FCSTestCase(priority = 3030, profiles = {
-        FCSTestProfile.CLARIN_FCS_1_0,
-        FCSTestProfile.CLARIN_FCS_2_0,
         FCSTestProfile.CLARIN_FCS_LEGACY
 })
 public class TestSearch3 extends FCSTest {

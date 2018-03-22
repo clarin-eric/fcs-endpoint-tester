@@ -39,6 +39,36 @@ public abstract class FCSTest {
             throws SRUClientException;
 
 
+    protected String escapeCQL(String q) {
+        if (q.contains(" ")) {
+            return "\"" + q + "\"";
+        } else {
+            return q;
+        }
+    }
+
+    
+    protected String escapeFCS(String q) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\"");
+        for (int i = 0; i < q.length(); i++) {
+            final char ch = q.charAt(i);
+            switch (ch) {
+            case '\\':
+                sb.append("\\\\");
+                break;
+            case '\'':
+                sb.append("\\'");
+                break;
+            default:
+                sb.append(ch);
+            }
+        }
+        sb.append("\"");
+        return sb.toString();
+    }
+
+
     protected FCSTestResult makeSuccess() {
         return new FCSTestResult(this, FCSTestResult.Code.SUCCESS,
                 "The test case was processed successfully");
