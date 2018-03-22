@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.clarin.sru</groupId>
     <artifactId>FCSEndpointTester</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Tester for CLARIN-FCS</name>
     <description>A test-service to test CLARIN-FCS endpoints for protocol conformance</description>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>eu.clarin.sru.fcs</groupId>
             <artifactId>fcs-simple-client</artifactId>
-            <version>1.4.0-SNAPSHOT</version>
+            <version>2.1.0-SNAPSHOT</version>
         </dependency>
 
         <!-- 
