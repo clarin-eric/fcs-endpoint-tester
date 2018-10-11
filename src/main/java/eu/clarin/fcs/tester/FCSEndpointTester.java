@@ -42,6 +42,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.NoConnectionReuseStrategy;
@@ -53,10 +54,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.clarin.sru.client.SRUClient;
+import eu.clarin.sru.client.SRUClientConfig;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUExplainRequest;
 import eu.clarin.sru.client.SRUExplainResponse;
-import eu.clarin.sru.client.SRUSimpleClient;
 import eu.clarin.sru.client.SRUVersion;
 import eu.clarin.sru.client.fcs.ClarinFCSClientBuilder;
 import eu.clarin.sru.client.fcs.ClarinFCSConstants;
@@ -312,8 +313,7 @@ public class FCSEndpointTester implements ServletContextListener {
 
         List<FCSTestResult> results = null;
 
-        final SRUSimpleClient client = context.getClient();
-        final FCSTestHandler handler = new FCSTestHandler();
+        final SRUClient client = context.getClient();
         final int totalCount = tests.size();
         int num = 1;
         listener.updateMaximum(totalCount);
@@ -321,7 +321,6 @@ public class FCSEndpointTester implements ServletContextListener {
             if (results == null) {
                 results = new LinkedList<FCSTestResult>();
             }
-
             logger.debug("running test {}:{}", num, test.getName());
             final String message = String.format(
                     "Performing test \"%s:%s\" (%d/%d) ...",
@@ -332,10 +331,9 @@ public class FCSEndpointTester implements ServletContextListener {
 
             FCSTestResult result = null;
             try {
-                handler.reset();
                 logcapturehandler.publish(new LogRecord(Level.FINE,
                         "running test class " + test.getClass().getName()));
-                result = test.perform(context, client, handler);
+                result = test.perform(context, client);
                 result.setLogRecords(logcapturehandler.getLogRecords());
             } catch (SRUClientException e) {
                 String msg = e.getMessage();
@@ -350,14 +348,15 @@ public class FCSEndpointTester implements ServletContextListener {
                         msg,
                         logcapturehandler.getLogRecords());
             } catch (Throwable t) {
-                final LogRecord record =
-                        new LogRecord(Level.SEVERE, "Internal Error!");
-                record.setThrown(t);
+                final LogRecord record = new LogRecord(Level.SEVERE,
+                        "The endpoint tester as triggered an internal error! " +
+                        "Please report to developers.");
                 logcapturehandler.publish(record);
                 result = new FCSTestResult(test,
                         FCSTestResult.Code.ERROR,
                         record.getMessage(),
                         logcapturehandler.getLogRecords());
+                logger.error("an internal error occured", t);
             }
             results.add(result);
         } // for

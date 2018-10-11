@@ -20,11 +20,11 @@ import eu.clarin.fcs.tester.FCSTest;
 import eu.clarin.fcs.tester.FCSTestCase;
 import eu.clarin.fcs.tester.FCSTestContext;
 import eu.clarin.fcs.tester.FCSTestProfile;
-import eu.clarin.fcs.tester.FCSTestHandler;
 import eu.clarin.fcs.tester.FCSTestResult;
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUExplainRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUExplainResponse;
 
 @FCSTestCase(priority=1050, profiles = {
         FCSTestProfile.CLARIN_FCS_1_0,
@@ -51,13 +51,13 @@ public class TestExplain5 extends FCSTest {
 
 
     @Override
-    public FCSTestResult perform(FCSTestContext context, SRUSimpleClient client,
-            FCSTestHandler handler) throws SRUClientException {
+    public FCSTestResult perform(FCSTestContext context, SRUClient client)
+            throws SRUClientException {
         SRUExplainRequest req = context.createExplainRequest();
         req.setExtraRequestData(SRUExplainRequest.X_MALFORMED_VERSION,
                 "9.9");
-        client.explain(req, handler);
-        return handler.findDiagnostic("info:srw/diagnostic/1/5")
+        SRUExplainResponse res = client.explain(req);
+        return findDiagnostic(res, "info:srw/diagnostic/1/5")
                 ? makeSuccess()
                 : makeErrorNoDiagnostic("info:srw/diagnostic/1/5");
     }

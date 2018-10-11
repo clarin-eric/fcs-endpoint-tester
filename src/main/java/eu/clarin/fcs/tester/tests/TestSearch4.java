@@ -20,12 +20,12 @@ import eu.clarin.fcs.tester.FCSTest;
 import eu.clarin.fcs.tester.FCSTestCase;
 import eu.clarin.fcs.tester.FCSTestContext;
 import eu.clarin.fcs.tester.FCSTestProfile;
-import eu.clarin.fcs.tester.FCSTestHandler;
 import eu.clarin.fcs.tester.FCSTestResult;
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientConstants;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUSearchRetrieveRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUSearchRetrieveResponse;
 
 
 @FCSTestCase(priority = 3040, profiles = {
@@ -54,15 +54,15 @@ public class TestSearch4 extends FCSTest {
 
 
     @Override
-    public FCSTestResult perform(FCSTestContext context, SRUSimpleClient client,
-            FCSTestHandler handler) throws SRUClientException {
+    public FCSTestResult perform(FCSTestContext context, SRUClient client)
+            throws SRUClientException {
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(SRUClientConstants.QUERY_TYPE_CQL,
                 escapeCQL(context.getRandomSearchTerm()));
         req.setExtraRequestData(
                 SRUSearchRetrieveRequest.X_MALFORMED_RECORD_XML_ESCAPING, "invalid");
-        client.searchRetrieve(req, handler);
-        return handler.findDiagnostic("info:srw/diagnostic/1/71")
+        SRUSearchRetrieveResponse res = client.searchRetrieve(req);
+        return findDiagnostic(res, "info:srw/diagnostic/1/71")
                 ? makeSuccess()
                 : makeErrorNoDiagnostic("info:srw/diagnostic/1/71");
     }

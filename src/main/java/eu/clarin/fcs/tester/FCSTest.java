@@ -16,12 +16,17 @@
  */
 package eu.clarin.fcs.tester;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.LogRecord;
 
-
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientException;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUDiagnostic;
+import eu.clarin.sru.client.SRUExplainResponse;
+import eu.clarin.sru.client.SRUScanResponse;
+import eu.clarin.sru.client.SRUSearchRetrieveResponse;
+import eu.clarin.sru.client.SRUTerm;
 
 
 public abstract class FCSTest {
@@ -35,8 +40,7 @@ public abstract class FCSTest {
 
 
     public abstract FCSTestResult perform(FCSTestContext context,
-            SRUSimpleClient client, FCSTestHandler handler)
-            throws SRUClientException;
+            SRUClient client) throws SRUClientException;
 
 
     protected String escapeCQL(String q) {
@@ -69,9 +73,84 @@ public abstract class FCSTest {
     }
 
 
+    protected boolean findDiagnostic(SRUExplainResponse res, String uri) {
+        return dofindDiagnostic(res.getDiagnostics(), uri);
+
+    }
+
+
+    protected boolean findDiagnostic(SRUScanResponse res, String uri) {
+        return dofindDiagnostic(res.getDiagnostics(), uri);
+
+    }
+
+
+    protected boolean findDiagnostic(SRUSearchRetrieveResponse res,
+            String uri) {
+        return dofindDiagnostic(res.getDiagnostics(), uri);
+
+    }
+
+
+    private boolean dofindDiagnostic(List<SRUDiagnostic> diagnostics,
+            String uri) {
+        if (diagnostics != null) {
+            for (SRUDiagnostic diagnostic : diagnostics) {
+                if (uri.equals(diagnostic.getURI())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+//    protected int getDiagnosticCount(SRUExplainResponse res) {
+//        return doGetDiagnosticCount(res.getDiagnostics());
+//    }
+//
+//
+//    protected int getDiagnosticCount(SRUScanResponse res) {
+//        return doGetDiagnosticCount(res.getDiagnostics());
+//    }
+//
+//
+//    protected int getDiagnosticCount(SRUSearchRetrieveResponse res) {
+//        return doGetDiagnosticCount(res.getDiagnostics());
+//    }
+//
+//
+//    private int doGetDiagnosticCount(List<SRUDiagnostic> diagnostics) {
+//        return diagnostics != null ? diagnostics.size() : 0;
+//    }
+
+    protected int getTermsCount(SRUScanResponse res) {
+        return res.getTerms() != null ? res.getTerms().size() : 1;
+    }
+
+    protected List<SRUTerm> getTerms(SRUScanResponse res) {
+        if (res.getTerms() != null) {
+            return res.getTerms();
+        } else {
+           return Collections.emptyList(); 
+        }
+    }
+
+
+    protected boolean isDiagnostic(SRUDiagnostic d, String uri) {
+        return uri.equals(d.getURI());
+    }
+
+
     protected FCSTestResult makeSuccess() {
         return new FCSTestResult(this, FCSTestResult.Code.SUCCESS,
                 "The test case was processed successfully");
+    }
+
+
+    protected FCSTestResult makeSkipped() {
+        return new FCSTestResult(this, FCSTestResult.Code.SKIPPED,
+                "The test case was skipped because it was not applicable");
     }
 
 

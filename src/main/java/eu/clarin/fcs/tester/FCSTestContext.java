@@ -16,18 +16,22 @@
  */
 package eu.clarin.fcs.tester;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.RandomStringUtils;
 
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUExplainRequest;
 import eu.clarin.sru.client.SRUScanRequest;
 import eu.clarin.sru.client.SRUSearchRetrieveRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
 import eu.clarin.sru.client.SRUVersion;
 import eu.clarin.sru.client.fcs.ClarinFCSClientBuilder;
 import eu.clarin.sru.client.fcs.ClarinFCSEndpointDescriptionParser;
 
 
 public class FCSTestContext {
+    public static final String PROP_SUPPORTS_ADV = "supports_adv_search";
     private final FCSTestProfile profile;
     private final String baseURI;
     private final String userSearchTerm;
@@ -37,7 +41,8 @@ public class FCSTestContext {
     private final String randomSearchTerm =
             RandomStringUtils.randomAlphanumeric(16);
     private final String unicodeSearchTerm = "öäüÖÄÜß€";
-    private SRUSimpleClient client;
+    private SRUClient client;
+    private Map<String, Object> properies;
 
 
     public FCSTestContext(FCSTestProfile profile, String baseURI,
@@ -97,7 +102,7 @@ public class FCSTestContext {
                 .enableFullLegacyCompatMode();
             break;
         }
-        client = builder.buildSimpleClient();
+        client = builder.buildClient();
     }
 
 
@@ -141,7 +146,7 @@ public class FCSTestContext {
     }
 
 
-    public SRUSimpleClient getClient() {
+    public SRUClient getClient() {
         return client;
     }
 
@@ -167,6 +172,29 @@ public class FCSTestContext {
                 new SRUSearchRetrieveRequest(baseURI.toString());
         request.setStrictMode(strictMode);
         return request;
+    }
+
+    public void setProperty(String key, Object value) {
+        if (properies == null) {
+            properies = new HashMap<String, Object>();
+        }
+        properies.put(key, value);
+    }
+    
+    public Object getProperty(String key) {
+        if (properies != null) {
+            return properies.get(key);
+        } else {
+            return null;
+        }
+    }
+    
+    public boolean hasProperty(String key) {
+        if (properies != null) {
+            return properies.containsKey(key);
+        } else {
+            return false;
+        }
     }
 
 } // class FCSTestContext

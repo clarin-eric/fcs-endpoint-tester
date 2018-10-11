@@ -22,7 +22,7 @@ import java.util.logging.LogRecord;
 
 public class FCSTestResult {
     public static enum Code {
-        SUCCESS, WARNING, ERROR
+        SUCCESS, WARNING, ERROR, SKIPPED;
     }
 
     private final FCSTest testCase;

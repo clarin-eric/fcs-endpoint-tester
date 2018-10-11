@@ -20,14 +20,14 @@ import eu.clarin.fcs.tester.FCSTest;
 import eu.clarin.fcs.tester.FCSTestCase;
 import eu.clarin.fcs.tester.FCSTestContext;
 import eu.clarin.fcs.tester.FCSTestProfile;
-import eu.clarin.fcs.tester.FCSTestHandler;
-import eu.clarin.fcs.tester.FCSTestHandler.SurrogateDiagnostic;
 import eu.clarin.fcs.tester.FCSTestResult;
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientConstants;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUDiagnostic;
+import eu.clarin.sru.client.SRURecord;
 import eu.clarin.sru.client.SRUSearchRetrieveRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUSearchRetrieveResponse;
 import eu.clarin.sru.client.SRUSurrogateRecordData;
 import eu.clarin.sru.client.fcs.DataView;
 import eu.clarin.sru.client.fcs.LegacyClarinFCSRecordData;
@@ -66,35 +66,34 @@ public class TestSearch12 extends FCSTest {
 
 
     @Override
-    public FCSTestResult perform(FCSTestContext context, SRUSimpleClient client,
-            FCSTestHandler handler) throws SRUClientException {
+    public FCSTestResult perform(FCSTestContext context, SRUClient client)
+            throws SRUClientException {
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(SRUClientConstants.QUERY_TYPE_CQL,
                 escapeCQL(context.getUserSearchTerm()));
         req.setRecordSchema(FCS_RECORD_SCHEMA);
         req.setMaximumRecords(5);
-        client.searchRetrieve(req, handler);
-        if (handler.findDiagnostic("info:srw/diagnostic/1/66")) {
+        SRUSearchRetrieveResponse res = client.searchRetrieve(req);
+        if (findDiagnostic(res, "info:srw/diagnostic/1/66")) {
             return makeError("Endpoint claims to not " +
                     "support FCS record schema (" + FCS_RECORD_SCHEMA + ")");
-        } else if (handler.getRecordCount() == 0) {
+        } else if (res.getRecordsCount() == 0) {
             return makeWarning("Endpoint has no results " +"" +
                     "for search term \"" + context.getUserSearchTerm() +
                     "\". Please supply a different search term.");
         } else {
-            for (FCSTestHandler.Record record : handler.getRecords()) {
-                String recordSchema = record.getData().getRecordSchema();
-                if (SRUSurrogateRecordData.RECORD_SCHEMA.equals(recordSchema)) {
-                    final SurrogateDiagnostic data =
-                            (SurrogateDiagnostic) record.getData();
+            for (SRURecord record : res.getRecords()) {
+                if (record.isRecordSchema(SRUSurrogateRecordData.RECORD_SCHEMA)) {
+                    final SRUSurrogateRecordData data =
+                            (SRUSurrogateRecordData) record.getRecordData();
                     final SRUDiagnostic d = data.getDiagnostic();
 
-                    if (data.isDiagnostic("info:srw/diagnostic/1/67")) {
+                    if (isDiagnostic(d, "info:srw/diagnostic/1/67")) {
                         return makeError("Endpoint cannot render record in " +
                                 "CLARIN-FCS record format and returned " +
                                 "surrogate diagnostic \"info:srw/diagnostic/1/67\" " +
                                 "instead.");
-                    } else if (data.isDiagnostic("info:clarin/sru/diagnostic/2")) {
+                    } else if (isDiagnostic(d, "info:clarin/sru/diagnostic/2")) {
                         return makeError("Endpoint sent one or more records with record " +
                                         "schema of '" + d.getDetails() +
                                         "' instead of '" + FCS_RECORD_SCHEMA +
@@ -114,9 +113,9 @@ public class TestSearch12 extends FCSTest {
                         }
                         return makeError(sb.toString());
                     }
-                } else if (FCS_RECORD_SCHEMA.equals(recordSchema)) {
+                } else if (record.isRecordSchema(FCS_RECORD_SCHEMA)) {
                     final LegacyClarinFCSRecordData data =
-                            (LegacyClarinFCSRecordData) record.getData();
+                            (LegacyClarinFCSRecordData) record.getRecordData();
                     final Resource resource = data.getResource();
                     boolean foundKwic = false;
                     if (resource.hasDataViews()) {
@@ -144,12 +143,12 @@ public class TestSearch12 extends FCSTest {
                     return makeError("Endpoint does not supply results in FCS record schema (" + FCS_RECORD_SCHEMA + "\"");
                 }
             }
-            if (handler.getRecordCount() > req.getMaximumRecords()) {
+            if (res.getRecordsCount() > req.getMaximumRecords()) {
                 return makeError("Endpoint did not honor upper requested limit for " +
                                 "\"maximumRecords\" parameter (up to " +
                                 req.getMaximumRecords() +
                                 " records where requested and endpoint delivered " +
-                                handler.getRecordCount() + " results)");
+                                res.getRecordsCount() + " results)");
             }
             return makeSuccess();
         }

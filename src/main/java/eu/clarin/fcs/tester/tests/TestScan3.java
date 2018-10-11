@@ -16,17 +16,15 @@
  */
 package eu.clarin.fcs.tester.tests;
 
-import java.util.List;
-
 import eu.clarin.fcs.tester.FCSTest;
 import eu.clarin.fcs.tester.FCSTestCase;
 import eu.clarin.fcs.tester.FCSTestContext;
 import eu.clarin.fcs.tester.FCSTestProfile;
-import eu.clarin.fcs.tester.FCSTestHandler;
 import eu.clarin.fcs.tester.FCSTestResult;
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUScanRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUScanResponse;
 
 @FCSTestCase(priority=2030, profiles = {
         FCSTestProfile.CLARIN_FCS_LEGACY
@@ -52,24 +50,23 @@ public class TestScan3 extends FCSTest {
 
 
     @Override
-    public FCSTestResult perform(FCSTestContext context, SRUSimpleClient client,
-            FCSTestHandler handler) throws SRUClientException {
+    public FCSTestResult perform(FCSTestContext context, SRUClient client) throws SRUClientException {
         SRUScanRequest req = context.createScanRequest();
         req.setScanClause("fcs.resource=root");
         req.setMaximumTerms(1);
-        client.scan(req, handler);
+        SRUScanResponse res = client.scan(req);
 
-        if (handler.getDiagnosticCount() > 0) {
-            if (handler.findDiagnostic("info:srw/diagnostic/1/4")) {
+        if (res.getDiagnosticsCount() > 0) {
+            if (findDiagnostic(res, "info:srw/diagnostic/1/4")) {
                 return makeWarning("Endpoint does not support 'scan' operation");
             } else {
                 return makeWarningUnexpectedDiagnostics();
             }
         } else {
-            List<String> terms = handler.getTerms();
-            if (terms.size() == 1) {
+            int count = getTermsCount(res);
+            if (count == 1) {
                 return makeSuccess();
-            } else if (terms.size() > 1) {
+            } else if (count > 1) {
                 return makeWarning("Endpoint did not honor 'maximumTerms' argument");
             }
         }

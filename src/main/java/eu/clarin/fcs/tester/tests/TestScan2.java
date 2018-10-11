@@ -16,17 +16,15 @@
  */
 package eu.clarin.fcs.tester.tests;
 
-import java.util.List;
-
 import eu.clarin.fcs.tester.FCSTest;
 import eu.clarin.fcs.tester.FCSTestCase;
 import eu.clarin.fcs.tester.FCSTestContext;
 import eu.clarin.fcs.tester.FCSTestProfile;
-import eu.clarin.fcs.tester.FCSTestHandler;
 import eu.clarin.fcs.tester.FCSTestResult;
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUScanRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUScanResponse;
 
 @FCSTestCase(priority=2010, profiles = {
         FCSTestProfile.CLARIN_FCS_LEGACY
@@ -52,18 +50,17 @@ public class TestScan2 extends FCSTest {
 
 
     @Override
-    public FCSTestResult perform(FCSTestContext context, SRUSimpleClient client,
-            FCSTestHandler handler) throws SRUClientException {
+    public FCSTestResult perform(FCSTestContext context, SRUClient client)
+            throws SRUClientException {
         SRUScanRequest req = context.createScanRequest();
         req.setScanClause("fcs.resource=root");
-        client.scan(req, handler);
+        SRUScanResponse res = client.scan(req);
 
-        if (handler.findDiagnostic("info:srw/diagnostic/1/4")) {
+        if (findDiagnostic(res, "info:srw/diagnostic/1/4")) {
             return makeWarning("Endpoint does not support 'scan' operation");
         } else {
-            if (handler.getDiagnosticCount() == 0) {
-                List<String> terms = handler.getTerms();
-                if (terms.size() >= 1) {
+            if (res.getDiagnosticsCount() == 0) {
+                if (getTermsCount(res) >= 1) {
                     return makeSuccess();
                 } else {
                     return makeWarning("Scan on 'fcs.resource = root' should yield at least one collection");

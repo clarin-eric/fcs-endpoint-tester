@@ -20,12 +20,12 @@ import eu.clarin.fcs.tester.FCSTest;
 import eu.clarin.fcs.tester.FCSTestCase;
 import eu.clarin.fcs.tester.FCSTestContext;
 import eu.clarin.fcs.tester.FCSTestProfile;
-import eu.clarin.fcs.tester.FCSTestHandler;
 import eu.clarin.fcs.tester.FCSTestResult;
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientConstants;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUSearchRetrieveRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUSearchRetrieveResponse;
 import eu.clarin.sru.client.fcs.ClarinFCSRecordData;
 
 @FCSTestCase(priority=Integer.MIN_VALUE, profiles = {
@@ -55,14 +55,14 @@ public class TestSearch2 extends FCSTest {
 
 
     @Override
-    public FCSTestResult perform(FCSTestContext context, SRUSimpleClient client,
-            FCSTestHandler handler) throws SRUClientException {
+    public FCSTestResult perform(FCSTestContext context, SRUClient client)
+            throws SRUClientException {
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(SRUClientConstants.QUERY_TYPE_CQL,
                 escapeCQL(context.getRandomSearchTerm()));
         req.setRecordSchema(ClarinFCSRecordData.RECORD_SCHEMA);
-        client.searchRetrieve(req, handler);
-        return handler.getDiagnosticCount() == 0
+        SRUSearchRetrieveResponse res = client.searchRetrieve(req);
+        return res.getDiagnosticsCount() == 0
                 ? makeSuccess()
                 : makeWarningUnexpectedDiagnostics();
     }

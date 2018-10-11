@@ -20,11 +20,11 @@ import eu.clarin.fcs.tester.FCSTest;
 import eu.clarin.fcs.tester.FCSTestCase;
 import eu.clarin.fcs.tester.FCSTestContext;
 import eu.clarin.fcs.tester.FCSTestProfile;
-import eu.clarin.fcs.tester.FCSTestHandler;
 import eu.clarin.fcs.tester.FCSTestResult;
+import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientException;
 import eu.clarin.sru.client.SRUScanRequest;
-import eu.clarin.sru.client.SRUSimpleClient;
+import eu.clarin.sru.client.SRUScanResponse;
 
 @FCSTestCase(priority=2000, profiles = {
         FCSTestProfile.CLARIN_FCS_LEGACY
@@ -50,13 +50,13 @@ public class TestScan1 extends FCSTest {
 
 
     @Override
-    public FCSTestResult perform(FCSTestContext context, SRUSimpleClient client,
-            FCSTestHandler handler) throws SRUClientException {
+    public FCSTestResult perform(FCSTestContext context, SRUClient client)
+            throws SRUClientException {
         SRUScanRequest req = context.createScanRequest();
         req.setExtraRequestData(SRUScanRequest.X_MALFORMED_SCAN_CLAUSE,
                 SRUScanRequest.MALFORMED_OMIT);
-        client.scan(req, handler);
-        return handler.findDiagnostic("info:srw/diagnostic/1/7")
+        SRUScanResponse res = client.scan(req);
+        return findDiagnostic(res, "info:srw/diagnostic/1/7")
                 ? makeSuccess()
                 : makeErrorNoDiagnostic("info:srw/diagnostic/1/7");
     }

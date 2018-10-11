@@ -51,6 +51,8 @@ public class ResultsView extends VerticalLayout {
             new ThemeResource("icons/result_warning.png");
     private static final Resource ICON_ERROR   =
             new ThemeResource("icons/result_error.png");
+    private static final Resource ICON_SKIPPED =
+            new ThemeResource("icons/weather_clouds.png");
     private static final DateTimeFormatter dateFmt =
             DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -63,6 +65,7 @@ public class ResultsView extends VerticalLayout {
         int count_success = 0;
         int count_warning = 0;
         int count_error   = 0;
+        int count_skipped = 0;
         for (FCSTestResult result : results) {
             switch (result.getCode()) {
             case SUCCESS:
@@ -73,6 +76,9 @@ public class ResultsView extends VerticalLayout {
                 break;
             case ERROR:
                 count_error++;
+                break;
+            case SKIPPED:
+                count_skipped++;
                 break;
             } // switch
         } // for
@@ -114,8 +120,8 @@ public class ResultsView extends VerticalLayout {
         addComponent(resultOverall);
 
         final Label resultsOverview = new Label(
-                String.format("Success: %d,  Warnings: %d, Errors: %d",
-                        count_success, count_warning, count_error));
+                String.format("Success: %d,  Warnings: %d, Errors: %d, Skipped: %d",
+                        count_success, count_warning, count_error, count_skipped));
         addComponent(resultsOverview);
 
         final Label resultListHeadline =
@@ -220,6 +226,8 @@ public class ResultsView extends VerticalLayout {
                 return ICON_WARNING;
             case ERROR:
                 return ICON_ERROR;
+            case SKIPPED:
+                return  ICON_SKIPPED;
             }
         }
         return null;

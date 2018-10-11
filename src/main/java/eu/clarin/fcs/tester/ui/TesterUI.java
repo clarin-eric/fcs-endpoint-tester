@@ -195,12 +195,12 @@ public class TesterUI extends UI {
         profileCombo = new ComboBox("CLARIN-FCS test profile:");
         profileCombo.addItem(PROFILE_AUTODETECT);
         profileCombo.setItemCaption(PROFILE_AUTODETECT, "Auto detect");
-        profileCombo.addItem(PROFILE_FCS_2_0);
-        profileCombo.setItemCaption(PROFILE_FCS_2_0, "CLARIN-FCS 2.0");
-        profileCombo.addItem(PROFILE_FCS_1_0);
-        profileCombo.setItemCaption(PROFILE_FCS_1_0, "CLARIN-FCS 1.0");
         profileCombo.addItem(PROFILE_FCS_LEGACY);
         profileCombo.setItemCaption(PROFILE_FCS_LEGACY, "Legacy FCS");
+        profileCombo.addItem(PROFILE_FCS_1_0);
+        profileCombo.setItemCaption(PROFILE_FCS_1_0, "CLARIN-FCS 1.0");
+        profileCombo.addItem(PROFILE_FCS_2_0);
+        profileCombo.setItemCaption(PROFILE_FCS_2_0, "CLARIN-FCS 2.0");
         profileCombo.select(PROFILE_AUTODETECT);
         profileCombo.setNullSelectionAllowed(false);
         profileCombo.setTextInputAllowed(false);
