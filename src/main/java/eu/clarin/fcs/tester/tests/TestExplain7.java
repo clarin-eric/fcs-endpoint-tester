@@ -29,6 +29,8 @@ import eu.clarin.sru.client.SRUExplainRequest;
 import eu.clarin.sru.client.SRUExplainResponse;
 import eu.clarin.sru.client.fcs.ClarinFCSConstants;
 import eu.clarin.sru.client.fcs.ClarinFCSEndpointDescription;
+import eu.clarin.sru.client.fcs.DataViewAdvanced;
+import eu.clarin.sru.client.fcs.DataViewHits;
 
 @FCSTestCase(priority=1100, profiles = {
         FCSTestProfile.CLARIN_FCS_2_0,
@@ -78,9 +80,42 @@ public class TestExplain7 extends FCSTest {
 
     private FCSTestResult validate(FCSTestContext context, ClarinFCSEndpointDescription desc) {
         if (desc.getVersion() == 2) {
-            if (!desc.getCapabilities()
-                    .contains(ClarinFCSConstants.CAPABILITY_ADVANCED_SEARCH)) {
+            boolean supportsADV = desc.getCapabilities()
+                    .contains(ClarinFCSConstants.CAPABILITY_ADVANCED_SEARCH);
+            if (supportsADV) {
                 context.setProperty(FCSTestContext.PROP_SUPPORTS_ADV, Boolean.TRUE);
+            }
+            if (desc.getSupportedDataViews().size() == 0) {
+                return makeError("No dataview declared. Endpoint must declare support for at least one data view");
+            } else {
+                boolean foundHits = false;
+                boolean foundAdv = false;
+                for (ClarinFCSEndpointDescription.DataView dataview : desc
+                        .getSupportedDataViews()) {
+                    if (dataview.isMimeType(DataViewHits.TYPE)) {
+                        foundHits = true;
+                    }
+                    if (dataview.isMimeType(DataViewAdvanced.TYPE)) {
+                        if (supportsADV) {
+                            foundAdv = true;
+                        }
+                    }
+                }
+                if (!foundHits) {
+                    return makeError("Endpoint must declare support for Generic Hits dataview (mimeType = " + DataViewHits.TYPE + ")");
+                }
+                if (supportsADV && !foundAdv) {
+                    return makeError("Capabilites indicate support for Advanced Search, so Endpoint must declare support for Advanced dataview (mimeType = " + DataViewHits.TYPE + ")");
+                    
+                }
+            }
+            if (desc.getResources().size() == 0) {
+                return makeError("No resources declared. Endpoint must declare at least one Resource");
+            }
+            if (supportsADV) {
+                if (desc.getSupportedLayers().size() == 0) {
+                    return makeError("Capabilites indicate support for Advanced Search, so Endpoint must supported layers");                    
+                }
             }
             return makeSuccess();
         } else {

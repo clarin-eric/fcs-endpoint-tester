@@ -114,8 +114,13 @@ public abstract class FCSTest {
     }
 
 
+    protected FCSTestResult makeSkipped(String message) {
+        return new FCSTestResult(this, FCSTestResult.Code.SKIPPED, message);
+    }
+
+
     protected FCSTestResult makeSkipped() {
-        return new FCSTestResult(this, FCSTestResult.Code.SKIPPED,
+        return makeSkipped(
                 "The test case was skipped because it was not applicable");
     }
 

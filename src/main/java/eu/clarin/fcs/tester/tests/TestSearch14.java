@@ -68,7 +68,7 @@ public class TestSearch14 extends FCSTest {
     public FCSTestResult perform(FCSTestContext context, SRUClient client)
             throws SRUClientException {
         if (!context.hasProperty(FCSTestContext.PROP_SUPPORTS_ADV)) {
-            return makeSkipped();
+            return makeSkipped("Endpoint claims no support for Advanced Search");
         }
         SRUSearchRetrieveRequest req = context.createSearchRetrieveRequest();
         req.setQuery(ClarinFCSConstants.QUERY_TYPE_FCS,

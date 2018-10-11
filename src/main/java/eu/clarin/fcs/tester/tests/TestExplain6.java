@@ -29,6 +29,7 @@ import eu.clarin.sru.client.SRUExplainRequest;
 import eu.clarin.sru.client.SRUExplainResponse;
 import eu.clarin.sru.client.fcs.ClarinFCSConstants;
 import eu.clarin.sru.client.fcs.ClarinFCSEndpointDescription;
+import eu.clarin.sru.client.fcs.DataViewHits;
 
 @FCSTestCase(priority=1100, profiles = {
         FCSTestProfile.CLARIN_FCS_1_0,
@@ -79,7 +80,24 @@ public class TestExplain6 extends FCSTest {
         if (desc.getVersion() == 1) {
             if (desc.getCapabilities()
                     .contains(ClarinFCSConstants.CAPABILITY_ADVANCED_SEARCH)) {
-                return makeError("Capabilities indicate support for advanced search, but FCS 1.0 does not support advanced search");
+                return makeError("Capabilities indicate support for Advanced Search, but FCS 1.0 does not support advanced search");
+            }
+            if (desc.getSupportedDataViews().size() == 0) {
+                return makeError("No dataview declared. Endpoint must declare support for at least one data view");
+            } else {
+                boolean found = false;
+                for (ClarinFCSEndpointDescription.DataView dataview : desc
+                        .getSupportedDataViews()) {
+                    if (dataview.isMimeType(DataViewHits.TYPE)) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    return makeError("Endpoint must declare support for Generic Hits dataview (mimeType = " + DataViewHits.TYPE + ")");
+                }
+            }
+            if (desc.getResources().size() == 0) {
+                return makeError("No resources declared. Endpoint must declare at least one Resource");
             }
             return makeSuccess();
         } else {
