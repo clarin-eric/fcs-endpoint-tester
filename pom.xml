@@ -22,9 +22,9 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <!-- dependencies -->
         <slf4j.version>1.7.25</slf4j.version>
-        <httpClient.version>4.5.5</httpClient.version>
+        <httpClient.version>4.5.6</httpClient.version>
         <!-- Vaadin dependencies -->
-        <vaadin.version>7.7.13</vaadin.version>
+        <vaadin.version>7.7.15</vaadin.version>
     </properties>
 
     <dependencies>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.10</version>
+            <version>0.9.11</version>
         </dependency>
 
         <dependency>
