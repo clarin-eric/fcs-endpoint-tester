@@ -63,7 +63,7 @@ public class TestScan3 extends FCSTest {
                 return makeWarningUnexpectedDiagnostics();
             }
         } else {
-            int count = getTermsCount(res);
+            int count = res.getTermsCount();
             if (count == 1) {
                 return makeSuccess();
             } else if (count > 1) {

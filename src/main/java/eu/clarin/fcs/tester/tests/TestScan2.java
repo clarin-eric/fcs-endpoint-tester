@@ -60,7 +60,7 @@ public class TestScan2 extends FCSTest {
             return makeWarning("Endpoint does not support 'scan' operation");
         } else {
             if (res.getDiagnosticsCount() == 0) {
-                if (getTermsCount(res) >= 1) {
+                if (res.getTermsCount() >= 1) {
                     return makeSuccess();
                 } else {
                     return makeWarning("Scan on 'fcs.resource = root' should yield at least one collection");

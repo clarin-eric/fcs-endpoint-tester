@@ -16,7 +16,6 @@
  */
 package eu.clarin.fcs.tester;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.LogRecord;
 
@@ -26,7 +25,6 @@ import eu.clarin.sru.client.SRUDiagnostic;
 import eu.clarin.sru.client.SRUExplainResponse;
 import eu.clarin.sru.client.SRUScanResponse;
 import eu.clarin.sru.client.SRUSearchRetrieveResponse;
-import eu.clarin.sru.client.SRUTerm;
 
 
 public abstract class FCSTest {
@@ -102,38 +100,6 @@ public abstract class FCSTest {
             }
         }
         return false;
-    }
-
-
-//    protected int getDiagnosticCount(SRUExplainResponse res) {
-//        return doGetDiagnosticCount(res.getDiagnostics());
-//    }
-//
-//
-//    protected int getDiagnosticCount(SRUScanResponse res) {
-//        return doGetDiagnosticCount(res.getDiagnostics());
-//    }
-//
-//
-//    protected int getDiagnosticCount(SRUSearchRetrieveResponse res) {
-//        return doGetDiagnosticCount(res.getDiagnostics());
-//    }
-//
-//
-//    private int doGetDiagnosticCount(List<SRUDiagnostic> diagnostics) {
-//        return diagnostics != null ? diagnostics.size() : 0;
-//    }
-
-    protected int getTermsCount(SRUScanResponse res) {
-        return res.getTerms() != null ? res.getTerms().size() : 1;
-    }
-
-    protected List<SRUTerm> getTerms(SRUScanResponse res) {
-        if (res.getTerms() != null) {
-            return res.getTerms();
-        } else {
-           return Collections.emptyList(); 
-        }
     }
 
 
