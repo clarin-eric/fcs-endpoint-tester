@@ -20,6 +20,10 @@
 	background-position: top right;
 }
 
+.footer div {
+    text-align: center;	
+}
+
 .small-margin {
 	padding: 4px !important;
 }
