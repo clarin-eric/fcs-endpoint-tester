@@ -22,7 +22,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- dependencies -->
         <slf4j.version>1.7.32</slf4j.version>
-        <httpClient.version>4.5.6</httpClient.version>
+        <httpClient.version>4.5.13</httpClient.version>
         <!-- Vaadin dependencies -->
         <vaadin.version>7.7.15</vaadin.version>
     </properties>
@@ -210,8 +210,6 @@
                     <draftCompile>false</draftCompile>
                     <compileReport>false</compileReport>
                     <style>OBF</style>
-                    <strict>true</strict>
-                    <soyc>false</soyc>
                 </configuration>
                 <executions>
                     <execution>
@@ -226,6 +224,7 @@
                         </configuration>
                         <goals>
                             <goal>resources</goal>
+                            <goal>update-widgetset</goal>
                             <goal>compile</goal>
                         </goals>
                     </execution>
