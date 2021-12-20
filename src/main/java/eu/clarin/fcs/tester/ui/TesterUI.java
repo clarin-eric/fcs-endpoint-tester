@@ -273,6 +273,12 @@ public class TesterUI extends UI {
         layout.addComponent(content);
         layout.setExpandRatio(content, 1.0f);
 
+        final Label footer = new Label(
+                "<div>For questions of bug reports please contact <a href=\"mailto:fcs@clarin.eu\">fcs@clarin.eu</a>.</div>",
+                ContentMode.HTML);
+        footer.setStyleName("footer");
+        layout.addComponent(footer);
+
         setNoResultsView();
 
         /* setup up some behaviors */
