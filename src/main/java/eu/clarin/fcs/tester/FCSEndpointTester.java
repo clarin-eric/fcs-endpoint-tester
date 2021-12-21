@@ -54,13 +54,8 @@ import org.slf4j.LoggerFactory;
 
 import eu.clarin.sru.client.SRUClient;
 import eu.clarin.sru.client.SRUClientException;
-import eu.clarin.sru.client.SRUExplainRequest;
-import eu.clarin.sru.client.SRUExplainResponse;
-import eu.clarin.sru.client.SRUVersion;
-import eu.clarin.sru.client.fcs.ClarinFCSClientBuilder;
-import eu.clarin.sru.client.fcs.ClarinFCSConstants;
-import eu.clarin.sru.client.fcs.ClarinFCSEndpointDescription;
-import eu.clarin.sru.client.fcs.ClarinFCSEndpointDescriptionParser;
+import eu.clarin.sru.client.fcs.utils.ClarinFCSEndpointVersionAutodetector;
+import eu.clarin.sru.client.fcs.utils.ClarinFCSEndpointVersionAutodetector.AutodetectedFCSVersion;
 
 
 public class FCSEndpointTester implements ServletContextListener {
@@ -84,6 +79,8 @@ public class FCSEndpointTester implements ServletContextListener {
     private final FCSLoggingHandler logcapturehandler =
             new FCSLoggingHandler();
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ClarinFCSEndpointVersionAutodetector versionAutodetector =
+            new ClarinFCSEndpointVersionAutodetector();
     private static final FCSEndpointTester INSTANCE = new FCSEndpointTester();
 
 
@@ -198,84 +195,39 @@ public class FCSEndpointTester implements ServletContextListener {
             final int socketTimeout) throws SRUClientException {
         listener.updateProgress("Detecting CLARIN-FCS profile ...");
 
-        FCSTestProfile profile = null;
-
-        SRUClient client = new ClarinFCSClientBuilder()
-                .addDefaultDataViewParsers()
-                .setDefaultSRUVersion(SRUVersion.VERSION_2_0)
-                .unknownDataViewAsString()
-                .enableLegacySupport()
-                .registerExtraResponseDataParser(
-                        new ClarinFCSEndpointDescriptionParser())
-                .buildClient();
-
+        AutodetectedFCSVersion version = null;
         try {
-            SRUExplainRequest request = new SRUExplainRequest(endpointURI);
-            request.setStrictMode(false);
-            request.setVersion(SRUVersion.VERSION_1_2);
-            request.setExtraRequestData(ClarinFCSConstants.X_FCS_ENDPOINT_DESCRIPTION,
-                    ClarinFCSConstants.TRUE);
-            request.setParseRecordDataEnabled(true);
-            SRUExplainResponse response = client.explain(request);
-
-            ClarinFCSEndpointDescription ed =
-                    response.getFirstExtraResponseData(ClarinFCSEndpointDescription.class);
-            if (ed != null) {
-                if (ed.getVersion() == 1) {
-                    profile = FCSTestProfile.CLARIN_FCS_1_0;
-                }
-            } else {
-                logger.debug("assume legacy");
-                profile = FCSTestProfile.CLARIN_FCS_LEGACY;
-            }
-
-            if (profile == null) {
-                request = new SRUExplainRequest(endpointURI);
-                request.setStrictMode(false);
-                request.setVersion(SRUVersion.VERSION_2_0);
-                request.setExtraRequestData(
-                        ClarinFCSConstants.X_FCS_ENDPOINT_DESCRIPTION,
-                        ClarinFCSConstants.TRUE);
-                request.setParseRecordDataEnabled(true);
-                try {
-                    response = client.explain(request);
-
-                    ed = response.getFirstExtraResponseData(
-                            ClarinFCSEndpointDescription.class);
-                    if (ed != null) {
-                        if (ed.getVersion() == 2) {
-                            profile = FCSTestProfile.CLARIN_FCS_2_0;
-                        }
-                    }
-                } catch (SRUClientException e) {
-                    if ((e.getMessage() != null) && (e.getMessage()
-                            .contains("responded with different version"))) {
-                        throw new SRUClientException(
-                                "Seriously broken Endpoint: when trying to " +
-                                "detect FCS 2.0 the Endpoint illegally " +
-                                "responded with a SRU 1.2 reponse to a " +
-                                "SRU 2.0 request!");
-                    } else {
-                        throw e;
-                    }
-                }
-            }
-            if (profile != null) {
-                final FCSTestContext context =
-                        new FCSTestContext(profile,
-                                endpointURI,
-                                searchTerm,
-                                strictMode,
-                                connectTimeout,
-                                socketTimeout);
-                return context;
-            }
+            version = versionAutodetector.autodetectVersion(endpointURI);
         } catch (SRUClientException e) {
             logger.error("error", e);
             throw new SRUClientException("An error occured while " +
                     "auto-detecting CLARIN-FCS version", e);
         }
-        throw new SRUClientException("Unable to auto-detect CLARIN-FCS version!");
+
+        logger.debug("auto-detected endpoint version = {}", version);
+
+        FCSTestProfile profile = null;
+        switch (version) {
+        case FCS_LEGACY:
+            profile = FCSTestProfile.CLARIN_FCS_LEGACY;
+            break;
+        case FCS_1_0:
+            profile = FCSTestProfile.CLARIN_FCS_1_0;
+            break;
+        case FCS_2_0:
+            profile = FCSTestProfile.CLARIN_FCS_2_0;
+            break;
+        case UNKNOWN:
+            /* $FALL-THROUGH$ */
+        default:
+            throw new SRUClientException("Unable to auto-detect CLARIN-FCS version!");
+        }
+        return new FCSTestContext(profile,
+                endpointURI,
+                searchTerm,
+                strictMode,
+                connectTimeout,
+                socketTimeout);
     }
 
 
@@ -300,7 +252,7 @@ public class FCSEndpointTester implements ServletContextListener {
         }
 
 
-        List<FCSTest> tests = new ArrayList<FCSTest>();
+        List<FCSTest> tests = new ArrayList<>();
         for (FCSTest test : TESTS) {
             final FCSTestCase tc =
                     test.getClass().getAnnotation(FCSTestCase.class);
@@ -317,7 +269,7 @@ public class FCSEndpointTester implements ServletContextListener {
         listener.updateMaximum(totalCount);
         for (FCSTest test : tests) {
             if (results == null) {
-                results = new LinkedList<FCSTestResult>();
+                results = new LinkedList<>();
             }
             logger.debug("running test {}:{}", num, test.getName());
             final String message = String.format(
@@ -413,7 +365,7 @@ public class FCSEndpointTester implements ServletContextListener {
             Set<Class<?>> annotations =
                     reflections.getTypesAnnotatedWith(FCSTestCase.class);
             if ((annotations != null) && !annotations.isEmpty()) {
-                List<Class<?>> classes = new ArrayList<Class<?>>(
+                List<Class<?>> classes = new ArrayList<>(
                         annotations.size());
                 for (Class<?> clazz : annotations) {
                     FCSTestCase tc = clazz.getAnnotation(FCSTestCase.class);
@@ -431,7 +383,7 @@ public class FCSEndpointTester implements ServletContextListener {
                 });
                 for (Class<?> clazz : classes) {
                     if (tests == null) {
-                        tests = new ArrayList<FCSTest>(classes.size());
+                        tests = new ArrayList<>(classes.size());
                     }
                     tests.add((FCSTest) clazz.newInstance());
                 }
