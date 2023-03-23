@@ -269,12 +269,12 @@
     <repositories>
         <repository>
             <id>clarin</id>
-            <url>http://catalog.clarin.eu/ds/nexus/content/repositories/Clarin/</url>
+            <url>https://catalog.clarin.eu/ds/nexus/content/repositories/Clarin/</url>
         </repository>
 
         <repository>
             <id>vaadin-addons</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
         </repository>
     </repositories>
 </project>
