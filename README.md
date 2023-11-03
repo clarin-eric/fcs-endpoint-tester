@@ -58,3 +58,18 @@ java -jar start.jar
 ```
 
 Visit http://localhost:8080/.
+
+### Docker
+
+Build the docker image:
+
+```bash
+# add --progress=plain to see build output
+docker build -t fcs-endpoint-tester .
+```
+
+Run container and map local port 8080 to container port 8080. The application will be at http://localhost:8080/.
+
+```bash
+docker run --rm -it -p 8080:8080 fcs-endpoint-tester
+```
